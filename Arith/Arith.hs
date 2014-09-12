@@ -33,13 +33,12 @@ lexer = foldr1 (<|>) (map (try . uncurry tokenParser) keywords)
     tokenParser t w = t <$ wordParser w
     wordParser s = string s <* (skipMany1 space <|> eof)
 
--- Make sure a left paren is followed by a space and a right paren is 
--- preceded by a space.
+-- Pad parenthesis with spaces
 prepare :: String -> String
 prepare []    = []
 prepare (x:xs)
-  | x == '('  = "( " ++ prepare xs
-  | x == ')'  = " )" ++ prepare xs
+  | x == '('  = " ( " ++ prepare xs
+  | x == ')'  = " ) " ++ prepare xs
   | otherwise = x : prepare xs
 
 runLexer :: String -> Either ParseError [Token]
@@ -55,7 +54,18 @@ data Term =
   | TmSucc Term
   | TmPred Term
   | TmIsZero Term
-    deriving (Show)
+
+instance Show Term where
+  show t
+    | isval t = case t of
+        TmTrue       -> "true"
+        TmFalse      -> "false"
+        TmZero       -> "0"
+        s@(TmSucc a) -> show . toInt $ s
+          where
+            toInt (TmSucc TmZero) = 1
+            toInt (TmSucc x) = 1 + toInt x 
+    | otherwise = "Can only show value terms"
 
 type ParserTok = GenParser Token ()
 
@@ -149,11 +159,9 @@ eval t
   | otherwise = eval . eval1 $ t
 
 runEval :: String -> Term
-runEval s = eval t
-  where
-    t = case runTokParser s of
-          Left _ -> error "The sky has fallen"
-          Right t' -> t'
+runEval s
+  | Right t <- runTokParser s = eval t
+  | otherwise = error "The sky has fallen"
 
  
 -- | Testing ------------------------------------------------------------------
