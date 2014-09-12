@@ -1,7 +1,6 @@
 module Arith where
 
 import Control.Applicative ((<$>), (<*>), (<$), (<*), (*>))
-import Control.Exception   (SomeException, handle)
 import Text.Parsec
 import Text.Parsec.Pos
 import Text.Parsec.String
@@ -141,15 +140,15 @@ eval1 (TmIsZero t)        = TmIsZero (eval1 t)
 
 eval1 _                   = error "No rules apply."
 
-eval :: Term -> IO Term
-eval t =
-  if isval t then return t else
-  let t' = eval1 t
-      handler :: SomeException -> IO Term
-      handler = \_ -> return t
-  in handle handler (eval t')
+-- | In contrast to the OCaml code we stop the recursion when we reach
+-- a value. This avoids the need to use Control.Exception and allows us
+-- to staty out of the IO monad.
+eval :: Term -> Term
+eval t
+  | isval t = t
+  | otherwise = eval . eval1 $ t
 
-runEval :: String -> IO Term
+runEval :: String -> Term
 runEval s = eval t
   where
     t = case runTokParser s of
