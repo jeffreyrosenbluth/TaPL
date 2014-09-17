@@ -9,7 +9,7 @@ import Eval
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Tests" [evalTests]
+tests = testGroup "Tests" [evalTests, bigStepTests]
 
 five :: String
 five = "succ(succ(succ(succ(succ 0))))"
@@ -17,10 +17,11 @@ five = "succ(succ(succ(succ(succ 0))))"
 showVal :: String -> String
 showVal = show . runEval
 
-makeTest :: (TestName, String, String) -> TestTree
-makeTest (name, expected, actual) =
-  testCase name $ showVal actual `compare` expected @?= EQ
+makeTest :: (String -> String) -> (TestName, String, String) -> TestTree
+makeTest sv (name, expected, actual) =
+  testCase name $ sv actual `compare` expected @?= EQ
 
+evalData :: [(String, String, String)]
 evalData
     = [("true", "true", "true"),
        ("false", "false", "false"),
@@ -41,5 +42,11 @@ evalData
        ("E-IsZero", "true", "iszero (pred (succ 0))")
       ]
 
-evalTests = testGroup "Eval Tests" (map makeTest evalData)
+evalTests :: TestTree
+evalTests = testGroup "Eval Tests" (map (makeTest showVal) evalData)
 
+showVal' :: String -> String
+showVal' = show . runEval'
+
+bigStepTests :: TestTree
+bigStepTests = testGroup "Big Step Tests" (map (makeTest showVal') evalData)

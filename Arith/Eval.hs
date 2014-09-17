@@ -47,30 +47,22 @@ runEval s
 eval1' :: Term -> Term
 eval1' t | isval t = t
 
-eval1' (TmSucc t) | isnumerical t = TmSucc (eval1' t)
+eval1' (TmSucc t) = case eval1' t of
+  t' | isnumerical t' -> TmSucc t'
 
 eval1' (TmPred t) = case eval1' t of
   TmZero                       -> TmZero
   (TmSucc t') | isnumerical t' -> t'
 
 eval1' (TmIf t1 t2 t3) = case (eval1' t1, eval1' t2, eval1' t3) of
-  (TmTrue, t, t') | isval t -> t
+  (TmTrue, t, t') | isval t   -> t
   (TmFalse, t, t') | isval t' -> t'
 
 eval1' (TmIsZero t) = case eval1' t of
-  TmZero -> TmTrue
+  TmZero                       -> TmTrue
   (TmSucc t') | isnumerical t' -> TmFalse
   
 runEval' :: String -> Term
 runEval' s
   | Right t <- runTokParser s = eval1' t
   | otherwise = error "The sky has fallen"
- 
--- | Testing ------------------------------------------------------------------
-
-test0 = "true"
-test1 = "if false then true else false"
-test2 = "0"
-test3 = "if false then 0 else (succ 0)"
-test4 = "iszero (pred (succ (succ 0)))"
-

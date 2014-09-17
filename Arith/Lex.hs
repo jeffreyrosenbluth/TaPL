@@ -11,9 +11,6 @@ import Text.Parsec
 import Text.Parsec.String
 import Types
 
--- | Lexing -------------------------------------------------------------------
-
-
 keywords :: [(Token, String)]
 keywords = [ (TokTrue, "true"), (TokFalse, "false"), (TokIf, "if")
            , (TokThen, "then"), (TokElse, "else")  , (TokZero, "0")
