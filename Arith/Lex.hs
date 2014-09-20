@@ -21,15 +21,7 @@ lexer :: Parser Token
 lexer = foldr1 (<|>) (map (try . uncurry tokenParser) keywords)
   where
     tokenParser t w = t <$ wordParser w
-    wordParser s = string s <* (skipMany1 space <|> eof)
-
--- Pad parenthesis with spaces
-prepare :: String -> String
-prepare []    = []
-prepare (x:xs)
-  | x == '('  = " ( " ++ prepare xs
-  | x == ')'  = " ) " ++ prepare xs
-  | otherwise = x : prepare xs
+    wordParser s = string s <* (skipMany1 (space <|> char '(' <|> char ')') <|> eof)
 
 runLexer :: String -> Either ParseError [Token]
-runLexer = parse (many lexer) "" . prepare
+runLexer = parse (many lexer) ""
