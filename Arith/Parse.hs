@@ -41,17 +41,13 @@ succTerm = TmSucc   <$> (skip TokSucc   *> term)
 predTerm = TmPred   <$> (skip TokPred   *> term)
 iszero   = TmIsZero <$> (skip TokIsZero *> term)
 
-paren :: ParserTok Term
-paren = skip TokLParen *> term <* skip TokRParen
-
 term :: ParserTok Term
-term = paren <|> ifTerm
-             <|> iszero
-             <|> succTerm
-             <|> predTerm
-             <|> true
-             <|> false
-             <|> zero
+term = ifTerm <|> iszero
+              <|> succTerm
+              <|> predTerm
+              <|> true
+              <|> false
+              <|> zero
 
 runTokParser :: String -> Either ParseError Term
 runTokParser s = parse term [] toks

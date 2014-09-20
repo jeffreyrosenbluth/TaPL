@@ -16,8 +16,6 @@ data Token =
   | TokSucc
   | TokPred
   | TokIsZero
-  | TokLParen
-  | TokRParen
     deriving (Show, Eq)
 
 type ParserTok = GenParser Token ()

@@ -14,8 +14,7 @@ import Types
 keywords :: [(Token, String)]
 keywords = [ (TokTrue, "true"), (TokFalse, "false"), (TokIf, "if")
            , (TokThen, "then"), (TokElse, "else")  , (TokZero, "0")
-           , (TokSucc, "succ"), (TokPred, "pred")  , (TokIsZero, "iszero")
-           , (TokLParen, "(") , (TokRParen, ")") ]
+           , (TokSucc, "succ"), (TokPred, "pred")  , (TokIsZero, "iszero")]
 
 lexer :: Parser Token
 lexer = foldr1 (<|>) (map (try . uncurry tokenParser) keywords)
